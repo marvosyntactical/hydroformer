@@ -18,7 +18,7 @@ from sinkhorn import SinkhornDistance
 
 MAX_ITER_SINK = 1
 
-# DEBUG = 1
+DEBUG = 0
 
 # diagnostics
 
@@ -202,9 +202,9 @@ class Viscosity1D(nn.Module):
         # print(x_t.shape, self.k.shape)
         lap  = F.conv1d(
             x_t,
-            self.k.expand(1,x_t.shape[1],3),
+            self.k.repeat(1,x_t.shape[1],1),
             padding=1
-        )        # discrete ∆ along T
+        ) # discrete ∆ along T
         lap  = lap.transpose(1,2)                      # (B,T,d)
         return self.nu * lap                       # Euler step with ν∆
 
@@ -303,7 +303,7 @@ class GPTConfig:
     bias: bool = True # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
     device: str = "cpu"
     nu: float = 0.0 # 0.05
-    rot_coef: float = 0.0 # 0.1
+    rot_coef: float = 0.01 # 0.1
 
 class GPT(nn.Module):
 

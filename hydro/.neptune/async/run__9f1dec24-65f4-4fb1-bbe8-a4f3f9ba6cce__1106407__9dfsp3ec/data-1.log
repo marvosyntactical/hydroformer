@@ -1,0 +1,47 @@
+{"obj": {"type": "AssignString", "path": ["sys", "description"], "value": ""}, "version": 1, "at": 1749508646.8310242}
+{"obj": {"type": "AssignString", "path": ["monitoring", "253e7842", "hostname"], "value": "ideas"}, "version": 2, "at": 1749508646.8311641}
+{"obj": {"type": "AssignString", "path": ["sys", "hostname"], "value": "ideas"}, "version": 3, "at": 1749508646.8312404}
+{"obj": {"type": "AssignString", "path": ["monitoring", "253e7842", "pid"], "value": "1106407"}, "version": 4, "at": 1749508646.8312933}
+{"obj": {"type": "AssignString", "path": ["monitoring", "253e7842", "tid"], "value": "140196586344448"}, "version": 5, "at": 1749508646.831344}
+{"obj": {"type": "AssignBool", "path": ["sys", "failed"], "value": false}, "version": 6, "at": 1749508646.8313837}
+{"obj": {"type": "ClearStringLog", "path": ["monitoring", "253e7842", "stdout"]}, "version": 7, "at": 1749508646.8314502}
+{"obj": {"type": "ClearStringLog", "path": ["monitoring", "253e7842", "stderr"]}, "version": 8, "at": 1749508646.8314981}
+{"obj": {"type": "AssignString", "path": ["source_code", "entrypoint"], "value": "toy.py"}, "version": 9, "at": 1749508646.8316858}
+{"obj": {"type": "UploadFileSet", "path": ["source_code", "files"], "file_globs": ["/home/silversurfer42/fun/node/hydroformer/hydro/toy.py"], "reset": "False"}, "version": 10, "at": 1749508646.8317454}
+{"obj": {"type": "UploadFile", "path": ["source_code", "diff"], "ext": "patch", "file_path": null, "tmp_file_name": "source_code_diff-1749508646.842087-2025-06-10_00.37.26.842087.patch", "clean_after_upload": false}, "version": 11, "at": 1749508646.8422484}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "[neptune] [warning] Info (NVML): NVML Shared Library Not Found. GPU usage metrics may not be reported. For more information, see https://docs.neptune.ai/help/nvml_error/\n", "step": null, "ts": 1749508646.8489425}]}, "version": 12, "at": 1749508646.84899}
+{"obj": {"type": "ConfigFloatSeries", "path": ["monitoring", "253e7842", "cpu"], "min": 0.0, "max": 100.0, "unit": "%"}, "version": 13, "at": 1749508646.8494737}
+{"obj": {"type": "ClearFloatLog", "path": ["monitoring", "253e7842", "cpu"]}, "version": 14, "at": 1749508646.8495448}
+{"obj": {"type": "ConfigFloatSeries", "path": ["monitoring", "253e7842", "memory"], "min": 0.0, "max": 7.180000305175781, "unit": "GB"}, "version": 15, "at": 1749508646.8496041}
+{"obj": {"type": "ClearFloatLog", "path": ["monitoring", "253e7842", "memory"]}, "version": 16, "at": 1749508646.8496304}
+{"obj": {"type": "LogFloats", "path": ["monitoring", "253e7842", "cpu"], "values": [{"value": 10.5, "step": null, "ts": 1749508646.8497944}]}, "version": 17, "at": 1749508646.8502738}
+{"obj": {"type": "AssignBool", "path": ["parameters", "baseline"], "value": false}, "version": 18, "at": 1749508646.8504462}
+{"obj": {"type": "LogFloats", "path": ["monitoring", "253e7842", "memory"], "values": [{"value": 3.5031509399414062, "step": null, "ts": 1749508646.8497944}]}, "version": 19, "at": 1749508646.850656}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "Loading WikiText2 via HuggingFace...", "step": null, "ts": 1749508646.8561618}]}, "version": 20, "at": 1749508646.856211}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "\n", "step": null, "ts": 1749508646.8573492}]}, "version": 21, "at": 1749508646.8573658}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "WARNING: using slow attention. Flash Attention requires PyTorch >= 2.0", "step": null, "ts": 1749508653.2938037}]}, "version": 22, "at": 1749508653.293878}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "\n", "step": null, "ts": 1749508653.294458}]}, "version": 23, "at": 1749508653.2944736}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "WARNING: using slow attention. Flash Attention requires PyTorch >= 2.0", "step": null, "ts": 1749508653.297849}]}, "version": 24, "at": 1749508653.2978663}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "\n", "step": null, "ts": 1749508653.2979546}]}, "version": 25, "at": 1749508653.2979665}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "WARNING: using slow attention. Flash Attention requires PyTorch >= 2.0", "step": null, "ts": 1749508653.2987566}]}, "version": 26, "at": 1749508653.2987697}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "\n", "step": null, "ts": 1749508653.2988932}]}, "version": 27, "at": 1749508653.2989037}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "WARNING: using slow attention. Flash Attention requires PyTorch >= 2.0", "step": null, "ts": 1749508653.2998526}]}, "version": 28, "at": 1749508653.299877}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "\n", "step": null, "ts": 1749508653.300195}]}, "version": 29, "at": 1749508653.3002121}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "WARNING: using slow attention. Flash Attention requires PyTorch >= 2.0", "step": null, "ts": 1749508653.3014374}]}, "version": 30, "at": 1749508653.3014543}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "\n", "step": null, "ts": 1749508653.3017719}]}, "version": 31, "at": 1749508653.3017826}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "WARNING: using slow attention. Flash Attention requires PyTorch >= 2.0", "step": null, "ts": 1749508653.303052}]}, "version": 32, "at": 1749508653.303066}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "\n", "step": null, "ts": 1749508653.3034809}]}, "version": 33, "at": 1749508653.303496}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "number of parameters: 0.62M", "step": null, "ts": 1749508653.3103018}]}, "version": 34, "at": 1749508653.310321}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "\n", "step": null, "ts": 1749508653.3105483}]}, "version": 35, "at": 1749508653.3105743}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "Loss:\t", "step": null, "ts": 1749508655.8827624}]}, "version": 36, "at": 1749508655.8828216}
+{"obj": {"type": "LogFloats", "path": ["train", "loss"], "values": [{"value": 6.864222049713135, "step": null, "ts": 1749508655.8832936}]}, "version": 37, "at": 1749508655.8833263}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": " ", "step": null, "ts": 1749508655.8834622}]}, "version": 38, "at": 1749508655.8834832}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "6.864222049713135", "step": null, "ts": 1749508655.8835483}]}, "version": 39, "at": 1749508655.883559}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "\n", "step": null, "ts": 1749508655.8836017}]}, "version": 40, "at": 1749508655.883612}
+{"obj": {"type": "LogFloats", "path": ["monitoring", "253e7842", "cpu"], "values": [{"value": 31.6, "step": null, "ts": 1749508656.8575613}]}, "version": 41, "at": 1749508656.8608162}
+{"obj": {"type": "LogFloats", "path": ["monitoring", "253e7842", "memory"], "values": [{"value": 6.962360382080078, "step": null, "ts": 1749508656.8575613}]}, "version": 42, "at": 1749508656.8627386}
+{"obj": {"type": "LogFloats", "path": ["train", "loss"], "values": [{"value": 6.743499755859375, "step": null, "ts": 1749508660.4310474}]}, "version": 43, "at": 1749508660.43137}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "Loss:\t", "step": null, "ts": 1749508660.447085}]}, "version": 44, "at": 1749508660.4471412}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": " ", "step": null, "ts": 1749508660.4509516}]}, "version": 45, "at": 1749508660.450989}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "6.743499755859375", "step": null, "ts": 1749508660.451106}]}, "version": 46, "at": 1749508660.4511178}
+{"obj": {"type": "LogStrings", "path": ["monitoring", "253e7842", "stdout"], "values": [{"value": "\n", "step": null, "ts": 1749508660.4511614}]}, "version": 47, "at": 1749508660.4511847}
