@@ -6,12 +6,12 @@ from hydro_model import GPT, GPTConfig
 URL = "http://mattmahoney.net/dc/text8.zip"
 if not os.path.exists("text8.zip"):
     import zipfile, urllib.request, tempfile
-    urllib.request.urlretrieve(URL, "text8.zip")
-    with zipfile.ZipFile("text8.zip") as zf:
-        with zf.open("text8") as f_in, open("text8_100k.txt","wb") as f_out:
+    urllib.request.urlretrieve(URL, "data/text8.zip")
+    with zipfile.ZipFile("data/text8.zip") as zf:
+        with zf.open("data/text8") as f_in, open("data/text8_100k.txt","wb") as f_out:
             f_out.write(f_in.read(100_000))     # first 100k chars
 
-with open("text8_100k.txt","r") as f:
+with open("data/text8_100k.txt","r") as f:
     data = f.read().lower()
 
 chars  = sorted(list(set(data)))
