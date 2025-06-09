@@ -1,1 +1,3 @@
 .neptune_tok
+hydro/data/*
+hydro/__pycache__/*

@@ -16,8 +16,20 @@ import torch.nn as nn
 from torch.nn import functional as F
 from sinkhorn import SinkhornDistance
 
-MAX_ITER_SINK = 5
+MAX_ITER_SINK = 1
 
+# DEBUG = 1
+
+# diagnostics
+
+def check_inf(x):
+    if not DEBUG: return
+    with torch.no_grad():
+        norm = x.norm(dim=-1).mean()
+        if not torch.isfinite(norm):
+            print("⚠️  NaN detected in hidden norms")
+            print("x min/max:", x.min().item(), x.max().item())
+            raise ValueError("NaNs in forward pass.")
 
 # ---------- helpers for maxwell ----------
 def project_tangent(vec, z):
@@ -101,7 +113,7 @@ class LayerNorm(nn.Module):
     def forward(self, input):
         return F.layer_norm(input, self.weight.shape, self.weight, self.bias, 1e-5)
 
-class CausalSelfAttention(nn.Module):
+class CausalSinkAttention(nn.Module):
 
     def __init__(self, config):
         super().__init__()
@@ -177,43 +189,53 @@ class SkewRotator(nn.Module):
 
 class Viscosity1D(nn.Module):
     """Simple Laplacian smoothing along the token axis."""
-    def __init__(self, d, nu=0.05):
+    def __init__(self, d, nu=0.05, device="cpu"):
         super().__init__()
         self.nu = nu
         # 1D conv with kernel [1,-2,1] acts as discrete Laplacian
-        kernel = torch.tensor([1.,-2.,1.]).view(1,1,3)
+        kernel = torch.tensor([1.,-2.,1.]).view(1,1,3).to(device=device)
         self.register_buffer('k', kernel)
 
     def forward(self, x):
         # B,T,d = x.shape
         x_t = x.transpose(1,2)                         # (B,d,T)
-        lap  = F.conv1d(x_t, self.k, padding=1)        # discrete ∆ along T
+        # print(x_t.shape, self.k.shape)
+        lap  = F.conv1d(
+            x_t,
+            self.k.expand(1,x_t.shape[1],3),
+            padding=1
+        )        # discrete ∆ along T
         lap  = lap.transpose(1,2)                      # (B,T,d)
         return self.nu * lap                       # Euler step with ν∆
 
 class HydroLiteBlock(nn.Module):
-    def __init__(self, d, n_heads, dropout=0.1,
-                 nu=0.05, rot_coef=0.1):
+    def __init__(self, config):
+        # nu=0.05, rot_coef=0.1):
         super().__init__()
-        self.ln1    = nn.LayerNorm(d)
-        self.attn   = SinkAttention(d, n_heads, dropout)
-        self.ln2    = nn.LayerNorm(d)
-        self.rot    = SkewRotator(d)
-        self.nu     = nu
-        self.rot_k  = rot_coef
-        self.visc   = Viscosity1D(d, nu)
+        self.ln1    = nn.LayerNorm(config.n_embd)
+        self.attn   = CausalSinkAttention(config)
+        self.ln2    = nn.LayerNorm(config.n_embd)
+        self.rot    = SkewRotator(config.n_embd)
+        self.nu     = config.nu
+        self.rot_k  = config.rot_coef
+        self.visc   = Viscosity1D(config.n_embd, config.nu, device=config.device)
 
-    def forward(self, x, attn_mask):
+    def forward(self, x):
         # 1. Pressure / "entropy nat-gradient" via Sinkhorn attention
-        y = self.attn(self.ln1(x), attn_mask)
+        y = self.attn(self.ln1(x))
         x = x + y
+        check_inf(x)
 
         # 2. Skew rotational mixing (energy-preserving)
         rot = self.rot(self.ln2(x))
-        x   = x + self.rot_k * rot
+        if self.rot_k:
+            x   = x + self.rot_k * rot
+        check_inf(x)
 
         # 3. Viscous smoothing (Laplacian)
-        x   = x + self.visc(x)
+        if self.nu:
+            x   = x + self.visc(x)
+        check_inf(x)
 
         return x
 
@@ -223,7 +245,7 @@ class MagnetoLiteBlock(nn.Module):
                  nu=0.05, k_nn=32):
         super().__init__()
         self.ln1  = nn.LayerNorm(d)
-        self.attn = SinkAttention(d, n_heads)
+        self.attn = CausalSinkAttention(d, n_heads)
         self.ln2  = nn.LayerNorm(d)
         self.rot  = SkewRotator(d)
         self.mag  = LatentMagField(d)
@@ -275,10 +297,13 @@ class GPTConfig:
     block_size: int = 1024
     vocab_size: int = 50304 # GPT-2 vocab_size of 50257, padded up to nearest multiple of 64 for efficiency
     n_layer: int = 12
-    n_head: int = 12
-    n_embd: int = 768
+    n_head: int = 8 # 12
+    n_embd: int = 128 # 768
     dropout: float = 0.0
     bias: bool = True # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+    device: str = "cpu"
+    nu: float = 0.0 # 0.05
+    rot_coef: float = 0.0 # 0.1
 
 class GPT(nn.Module):
 
