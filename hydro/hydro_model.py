@@ -16,7 +16,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 from sinkhorn import SinkhornDistance
 
-MAX_ITER_SINK = 1
+MAX_ITER_SINK = 6
 
 DEBUG = 0
 
@@ -302,8 +302,8 @@ class GPTConfig:
     dropout: float = 0.0
     bias: bool = True # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
     device: str = "cpu"
-    nu: float = 0.0 # 0.05
-    rot_coef: float = 0.01 # 0.1
+    nu: float = 0.01 # 0.05
+    rot_coef: float = 0.04 # 0.1
 
 class GPT(nn.Module):
 

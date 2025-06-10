@@ -3,7 +3,7 @@ import torch, torch.nn.functional as F
 from datasets import load_dataset
 from torch.utils.data import Dataset, DataLoader
 from pathlib import Path
-import requests, tqdm, textwrap, tarfile, io
+import requests, textwrap, tarfile, io
 from tqdm import tqdm
 import argparse
 import neptune
@@ -22,6 +22,7 @@ def parse_args():
         ], default="tinystories", help="Dataset name"
     )
     parser.add_argument("--enc", type=str, choices=["char", "bpe"], default="char", help="Tokenizer type (char, bpe)")
+    parser.add_argument("--device", type=str, choices=["cuda", "gpu", "cpu"], default="gpu")
 
     return parser.parse_args()
 
@@ -56,6 +57,7 @@ def main(args):
         from hydro_model import GPT, GPTConfig
 
     if args.dataset == "wiki2":
+
         print("Loading WikiText2 via HuggingFace...")
         dataset = load_dataset("wikitext", "wikitext-2-raw-v1")
         train_text = "\n".join(dataset['train']['text'])[:10_000_000]  # 10MB slice
@@ -149,17 +151,18 @@ def main(args):
 # n = int(0.9*len(data))
 
 
-    BATCH = 32
-    train_loader = DataLoader(CharDataset(train_ids), batch_size=BATCH, shuffle=True, drop_last=True)
-    val_loader   = DataLoader(CharDataset(val_ids),   batch_size=BATCH, shuffle=False, drop_last=True)
+    BATCH = 64
+    train_loader = DataLoader(trn_data, batch_size=BATCH, shuffle=True, drop_last=True)
+    val_loader   = DataLoader(val_data, batch_size=BATCH, shuffle=False, drop_last=True)
 
-
-
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cuda' if torch.cuda.is_available() and not args.device == "cpu" else "cpu"
+    print("Using Device:\t", device)
+    print(f"Vocab size: {voc_size}")
 
 # ------------------------------------------------------------------
 # 3. Model instantiation
 # ------------------------------------------------------------------
+
     cfg = GPTConfig(
         block_size = BLOCK,
         vocab_size = voc_size,
