@@ -7,6 +7,8 @@ import requests, tqdm, textwrap, tarfile, io
 from tqdm import tqdm
 import argparse
 import neptune
+import random
+
 
 
 
@@ -14,6 +16,12 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Swarm Experiments on MNIST")
     parser.add_argument("--neptune", action="store_true", help="Log to Neptune?")
     parser.add_argument("--baseline", action="store_true", help="Do vanilla Sinkformer?")
+    parser.add_argument("--dataset", type=str, choices=[
+            "tinystories",
+            "wiki2",
+        ], default="tinystories", help="Dataset name"
+    )
+    parser.add_argument("--enc", type=str, choices=["char", "bpe"], default="char", help="Tokenizer type (char, bpe)")
 
     return parser.parse_args()
 
@@ -47,31 +55,87 @@ def main(args):
     else:
         from hydro_model import GPT, GPTConfig
 
+    if args.dataset == "wiki2":
+        print("Loading WikiText2 via HuggingFace...")
+        dataset = load_dataset("wikitext", "wikitext-2-raw-v1")
+        train_text = "\n".join(dataset['train']['text'])[:10_000_000]  # 10MB slice
+        val_text   = "\n".join(dataset['validation']['text'])
 
-    print("Loading WikiText2 via HuggingFace...")
-    dataset = load_dataset("wikitext", "wikitext-2-raw-v1")
-    train_text = "\n".join(dataset['train']['text'])[:10_000_000]  # 10MB slice
-    val_text   = "\n".join(dataset['validation']['text'])
+        # Byte-level tokenizer
+        chars = sorted(set(train_text))
+        stoi = {ch: i for i, ch in enumerate(chars)}
+        itos = {i: ch for ch, i in stoi.items()}
+        def encode(s): return torch.tensor([stoi[c] for c in s if c in stoi], dtype=torch.long)
+        def decode(t): return ''.join(itos[int(i)] for i in t)
 
-# Byte-level tokenizer
-    chars = sorted(set(train_text))
-    stoi = {ch: i for i, ch in enumerate(chars)}
-    itos = {i: ch for ch, i in stoi.items()}
-    def encode(s): return torch.tensor([stoi[c] for c in s if c in stoi], dtype=torch.long)
-    def decode(t): return ''.join(itos[int(i)] for i in t)
+        train_ids = encode(train_text)
+        val_ids   = encode(val_text)
 
-    train_ids = encode(train_text)
-    val_ids   = encode(val_text)
+        BLOCK = 128
+        class CharDataset(Dataset):
+            def __init__(self, data):
+                self.data = data
+            def __len__(self): return len(self.data) - BLOCK
+            def __getitem__(self, idx):
+                x = self.data[idx:idx+BLOCK]
+                y = self.data[idx+1:idx+BLOCK+1]
+                return x, y
 
-    BLOCK = 64
-    class CharDataset(Dataset):
-        def __init__(self, data):
-            self.data = data
-        def __len__(self): return len(self.data) - BLOCK
-        def __getitem__(self, idx):
-            x = self.data[idx:idx+BLOCK]
-            y = self.data[idx+1:idx+BLOCK+1]
-            return x, y
+
+        trn_data = CharDataset(train_ids)
+        val_data = CharDataset(val_ids)
+
+        voc_size = len(stoi)
+
+
+    elif args.dataset == "tinystories":
+
+        print("Loading TinyStories …")
+        ds = load_dataset("roneneldan/TinyStories")  # 17‑tokenised already
+
+        # Concatenate train split into raw string
+        raw_text = "\n".join(ds["train"]["text"])
+        # Take ~25 MB slice for quick runs (25_000_000 chars)
+        raw_text = raw_text[:25_000_000]
+
+        if args.enc == "char":
+            # Very simple byte‑level vocab
+            chars = sorted(set(raw_text))
+            stoi  = {ch:i for i,ch in enumerate(chars)}
+            itos  = {i:ch for ch,i in stoi.items()}
+            def encode(s): return torch.tensor([stoi[c] for c in s if c in stoi], dtype=torch.long)
+            def decode(t): return "".join(itos[int(i)] for i in t)
+
+            ids = encode(raw_text)
+
+            voc_size = len(stoi)
+
+        elif args.enc == "bpe":
+
+            from transformers import AutoTokenizer
+            tok = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")   # any GPT2‑style BPE
+            ids = torch.tensor(tok.encode(raw_text), dtype=torch.long)
+            voc_size = tok.vocab_size
+
+        # 90/10 split
+        split = int(0.9 * len(ids))
+        train_ids = ids[:split]
+        val_ids   = ids[split:]
+
+        BLOCK = 256  # Stories use longer context
+
+        class TinyDataset(Dataset):
+            def __init__(self, data):
+                self.data = data
+            def __len__(self): return len(self.data) - BLOCK
+            def __getitem__(self, idx):
+                x = self.data[idx:idx+BLOCK]
+                y = self.data[idx+1:idx+BLOCK+1]
+                return x, y
+
+        trn_data = TinyDataset(train_ids)
+        val_data = TinyDataset(val_ids)
+
 
 # text = open(path_txt).read()
 # tok  = ByteTokenizer(text)
@@ -98,10 +162,10 @@ def main(args):
 # ------------------------------------------------------------------
     cfg = GPTConfig(
         block_size = BLOCK,
-        vocab_size = len(stoi),
+        vocab_size = voc_size,
         n_layer    = 3,
         n_head     = 8,
-        n_embd     = 32, # 512,
+        n_embd     = 256, # 512,
         dropout    = 0.1,
         bias       = False
     )
